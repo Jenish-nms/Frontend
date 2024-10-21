@@ -1,11 +1,12 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { ThreeDots } from 'react-loader-spinner';
-
+import Chart from 'react-apexcharts';
 
 export default function BandwidthServiceList() {
   const [bandwidthServiceList, setBandwidthServiceList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chartType, setChartType] = useState("bar");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,10 +17,9 @@ export default function BandwidthServiceList() {
       } catch (error) {
         console.log("Error fetching in BandwidthService...", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -36,8 +36,7 @@ export default function BandwidthServiceList() {
           <p className="card-text"><strong>Z-End Location:</strong> {data.zEndLocation}</p>
           <p className="card-text"><strong>Inter EMS:</strong> {data.interEms}</p>
           <p className="card-text"><strong>Inter Vendor:</strong> {data.interVendor}</p>
-  
-          <h6>A-End List:</h6>
+            <h6>A-End List:</h6>
           <ul className="list-group mb-2">
             {data.aEndList.map((item, idx) => (
               <li key={idx} className="list-group-item">
@@ -46,8 +45,7 @@ export default function BandwidthServiceList() {
               </li>
             ))}
           </ul>
-  
-          <h6>Z-End List:</h6>
+            <h6>Z-End List:</h6>
           <ul className="list-group mb-2">
             {data.zEndList.map((item, idx) => (
               <li key={idx} className="list-group-item">
@@ -56,8 +54,7 @@ export default function BandwidthServiceList() {
               </li>
             ))}
           </ul>
-  
-          <h6>SNC List:</h6>
+            <h6>SNC List:</h6>
           {Object.entries(data.sncList).map(([key, items]) => (
             <div key={key}>
               <h6>SNC Name: {key}</h6>
@@ -73,8 +70,7 @@ export default function BandwidthServiceList() {
               </ul>
             </div>
           ))}
-  
-          <h6>MECC MOID List:</h6>
+            <h6>MECC MOID List:</h6>
           <ul className="list-group mb-2">
             {data.meccMoidList.map((item, idx) => (
               <li key={idx} className="list-group-item">
@@ -89,29 +85,76 @@ export default function BandwidthServiceList() {
         </div>
       </div>
     </div>
-  );  
+  );
+
+  const chartData = {
+    options: {
+      chart: {
+        id: 'basic-bar',
+      },
+      xaxis: {
+        categories: bandwidthServiceList.map(service => service.label),
+      },
+    },
+    series: [{
+      name: 'Layer Rate',
+      data: bandwidthServiceList.map(service => service.layerRate),
+    }],
+  };
+
+  const donutData = {
+    options: {
+      labels: bandwidthServiceList.map(service => service.label),
+    },
+    series: bandwidthServiceList.map(service => service.layerRate),
+  };
 
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">Bandwidth Service List</h2>
       {loading ? (
-                <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '100px' }}>
-                     <ThreeDots
-                        visible={true}
-                        height="80"
-                        width="80"
-                        color="#4fa94d"
-                        radius="9"
-                        ariaLabel="three-dots-loading"
-                    />
-                    <p>Fetching data, please wait...</p>
-                </div>
+        <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '100px' }}>
+          <ThreeDots
+            visible={true}
+            height="80"
+            width="80"
+            color="#4fa94d"
+            radius="9"
+            ariaLabel="three-dots-loading"
+          />
+          <p>Fetching data, please wait...</p>
+        </div>
       ) : (
-          <div className="row">
-            {bandwidthServiceList.map((data, index) => (
-              renderService(data)
-            ))}
+        <div>
+          <div className="mb-3 text-center">
+            <button className="btn btn-primary me-2" onClick={() => setChartType("bar")}>Bar Chart</button>
+            <button className="btn btn-secondary" onClick={() => setChartType("donut")}>Donut Chart</button>
           </div>
+          <div className="row">
+            <div className="col-md-6">
+              {chartType === "bar" ? (
+                <Chart
+                  options={chartData.options}
+                  series={chartData.series}
+                  type="bar"
+                  width="500"
+                />
+              ) : (
+                <Chart
+                  options={donutData.options}
+                  series={donutData.series}
+                  type="donut"
+                  width="500"
+                />
+              )}
+            </div>
+            <div className="col-md-6">
+              {bandwidthServiceList.map((data, index) => (
+                renderService(data)
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

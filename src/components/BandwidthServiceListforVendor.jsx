@@ -1,46 +1,49 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import Chart from "react-apexcharts";
 import { ThreeDots } from 'react-loader-spinner';
 
-
-export default function BandwidthServiceListForVendor({value, isInterVendor, isInterEms}) {
-    const vendorName = value;
-    //console.log(isInterVendor)
-    //console.log(vendorName)
+export default function BandwidthServiceListForVendor({ value, isInterVendor, isInterEms }) {
+  const vendorName = value;
   const [bandwidthServiceList, setBandwidthServiceList] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [chartType, setChartType] = useState("bar");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         let url;
-        if(isInterVendor && isInterEms) {
-          url = "/bandwidth/vendor/interEmsAndInterVendor"
-          } else if(isInterVendor){
-          url = "/bandwidth/interVendor"
-          } else if(isInterEms){
-              url = "/bandwidth/vendor/interEms"
-          } else {
-              url = "/bandwidth/vendor"
-          }
-
-        if(url) {
-          const response = await axios.get(url, {
-            params: {vendorName}
-          });
+        if (isInterVendor && isInterEms) {
+          url = "/bandwidth/vendor/interEmsAndInterVendor";
+        } else if (isInterVendor) {
+          url = "/bandwidth/interVendor";
+        } else if (isInterEms) {
+          url = "/bandwidth/vendor/interEms";
+        } else {
+          url = "/bandwidth/vendor";
+        }
+        if (url) {
+          const response = await axios.get(url, { params: { vendorName } });
           setBandwidthServiceList(response.data);
-          //console.log(response.data);
         }
       } catch (error) {
         console.log("Error fetching in BandwidthService...", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
-
     fetchData();
   }, [vendorName, isInterVendor, isInterEms]);
+
+  const chartOptions = {
+    chart: {
+      type: chartType,
+    },
+    labels: bandwidthServiceList.map(item => item.label),
+    series: chartType === "bar"
+      ? [{ data: bandwidthServiceList.map(item => item.layerRate) }]
+      : bandwidthServiceList.map(item => item.layerRate),
+  };
 
   const renderService = (data) => (
     <div className="mb-4">
@@ -55,7 +58,6 @@ export default function BandwidthServiceListForVendor({value, isInterVendor, isI
           <p className="card-text"><strong>Z-End Location:</strong> {data.zEndLocation}</p>
           <p className="card-text"><strong>Inter EMS:</strong> {data.interEms}</p>
           <p className="card-text"><strong>Inter Vendor:</strong> {data.interVendor}</p>
-  
           <h6>A-End List:</h6>
           <ul className="list-group mb-2">
             {data.aEndList.map((item, idx) => (
@@ -65,7 +67,6 @@ export default function BandwidthServiceListForVendor({value, isInterVendor, isI
               </li>
             ))}
           </ul>
-  
           <h6>Z-End List:</h6>
           <ul className="list-group mb-2">
             {data.zEndList.map((item, idx) => (
@@ -84,23 +85,30 @@ export default function BandwidthServiceListForVendor({value, isInterVendor, isI
     <div className="container mt-5">
       <h2 className="text-center mb-4">Bandwidth Service List</h2>
       {loading ? (
-                <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '100px' }}>
-                     <ThreeDots
-                        visible={true}
-                        height="80"
-                        width="80"
-                        color="#4fa94d"
-                        radius="9"
-                        ariaLabel="three-dots-loading"
-                    />
-                    <p>Fetching data, please wait...</p>
-                </div>
+        <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '100px' }}>
+          <ThreeDots
+            visible={true}
+            height="80"
+            width="80"
+            color="#4fa94d"
+            radius="9"
+            ariaLabel="three-dots-loading"
+          />
+          <p>Fetching data, please wait...</p>
+        </div>
       ) : (
+        <>
+          <div className="d-flex justify-content-center mb-4">
+            <button onClick={() => setChartType("bar")} className="btn btn-primary me-2">Bar Chart</button>
+            <button onClick={() => setChartType("donut")} className="btn btn-primary">Donut Chart</button>
+          </div>
+          <Chart options={chartOptions} series={chartOptions.series} type={chartType} height={350} />
           <div className="row">
             {bandwidthServiceList.map((data, index) => (
               renderService(data)
             ))}
           </div>
+        </>
       )}
     </div>
   );

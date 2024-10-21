@@ -160,7 +160,7 @@ return (
       <DroppableArea onDrop={handleDrop}>
         {droppedServices.map(service => (
           <div key={service.id}
-              style={{ userSelect: 'none', padding: '16px', margin: '0 8px 8px 0', background: 'grey', width: '120px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+              style={{ userSelect: 'none', padding: '16px', margin: '0 8px 8px 0', background: 'grey', width: '130px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
               onClick={() => { setModalShow(true); setSelectedService(service);}}
           >
             {service.content}

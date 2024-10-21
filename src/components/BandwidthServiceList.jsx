@@ -91,22 +91,92 @@ export default function BandwidthServiceList() {
     options: {
       chart: {
         id: 'basic-bar',
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 600,
+          animateGradually: {
+              enabled: true,
+              delay: 150
+          },
+          dynamicAnimation: {
+              enabled: true,
+              speed: 350
+          }
+        },
+      toolbar: {
+        show: true,
+        offsetX: 0,
+        offsetY: 0,
+        tools: {
+          download: true,
+          selection: true,
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+        }
       },
-      xaxis: {
-        categories: bandwidthServiceList.map(service => service.label),
       },
+      // xaxis: {
+      //   categories: bandwidthServiceList.map(service => service.vendorName),
+      // },
+      labels: ["Jan", "Feb", "Mar", "Apr", "May","June"],
     },
-    series: [{
-      name: 'Layer Rate',
-      data: bandwidthServiceList.map(service => service.layerRate),
+    // series: [{
+    //   name: 'Layer Rate',
+    //   data: bandwidthServiceList.map(service => service.layerRate),
+    // }],
+    series:[{
+      data: Object.freeze([23, 34, 12, 54, 32, 43])
     }],
   };
 
   const donutData = {
     options: {
-      labels: bandwidthServiceList.map(service => service.label),
+      chart: {
+        animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 600,
+            animateGradually: {
+                enabled: true,
+                delay: 150
+            },
+            dynamicAnimation: {
+                enabled: true,
+                speed: 350
+            }
+        },
+        toolbar: {
+          show: true,
+          offsetX: 0,
+          offsetY: 0,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+          }
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val) {
+          return val.toFixed(2) + "%"
+        },
+      },
+      //labels: bandwidthServiceList.map(service => service.vendorName),
+      labels: ["Jan", "Feb", "Mar", "Apr", "May","June"],
+      legend: {
+        show: true,
+        position: "top",
+      },
     },
-    series: bandwidthServiceList.map(service => service.layerRate),
+    //series: bandwidthServiceList.map(service => service.layerRate),
+    series: Object.freeze([23, 34, 12, 54, 32, 43]),
   };
 
   return (

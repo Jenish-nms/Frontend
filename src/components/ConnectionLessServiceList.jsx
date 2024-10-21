@@ -7,6 +7,8 @@ function ConnectionLessServiceList() {
 const [connectionLessServiceList, setConnectionLessServiceList] = useState([]);
 const [loading, setLoading] = useState(true);
 const [chartType, setChartType] = useState("bar");
+const [barChartData, setBarChartData] = useState([]);
+const [donutChartData, setDonutChartData] = useState([]);
 
 useEffect(() => {
 const fetchData = async () => {
@@ -20,17 +22,104 @@ const fetchData = async () => {
     }
 };
 fetchData();
+getChartData();
 }, []);
 
-const chartOptions = {
-chart: {
-    type: chartType,
-},
-labels: connectionLessServiceList.map(item => item.label),
-series: chartType === "bar"
-    ? [{ data: connectionLessServiceList.map(item => item.serviceType) }]
-    : connectionLessServiceList.map(item => item.serviceType),
-};
+const getChartData = async () => {
+    try {
+        const response = await axios.get('/connectionLessService/chartData');
+        setBarChartData(response.data);
+        setDonutChartData(response.data);
+        //console.log(response.data);
+    } catch (error) {
+        console.log("Error fetching in chart data...", error);
+    }
+}
+
+const BarData = {
+    options: {
+      chart: {
+        id: 'basic-bar',
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 600,
+          animateGradually: {
+              enabled: true,
+              delay: 150
+          },
+          dynamicAnimation: {
+              enabled: true,
+              speed: 350
+          }
+        },
+      toolbar: {
+        show: true,
+        offsetX: 0,
+        offsetY: 0,
+        tools: {
+          download: true,
+          selection: true,
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+        }
+      },
+    },
+    labels: Object.entries(barChartData).map(([key, value]) => key),
+  },
+    series:[{
+      name: "count",
+      data: Object.entries(barChartData).map(([key, value]) => value),
+    }],
+  };
+
+const donutData = {
+    options: {
+      chart: {
+        animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 600,
+            animateGradually: {
+                enabled: true,
+                delay: 150
+            },
+            dynamicAnimation: {
+                enabled: true,
+                speed: 350
+            }
+        },
+        toolbar: {
+          show: true,
+          offsetX: 0,
+          offsetY: 0,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+          }
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val) {
+          console.log(val)
+          return val.toFixed(2) + "%"
+        },
+      },
+      labels: Object.entries(donutChartData).map(([key, value]) => key),
+      legend: {
+        show: true,
+        position: "top",
+      },
+    },
+    series: Object.entries(donutChartData).map(([key, value]) => value),
+  };
 
 const renderService = (data) => (
 <div className="mb-4">
@@ -94,13 +183,31 @@ return (
     </div>
     ) : (
     <>
-        <div className="d-flex justify-content-center mb-4">
+        <div className="mb-3 text-center">
         <button onClick={() => setChartType("bar")} className="btn btn-primary me-2">Bar Chart</button>
-        <button onClick={() => setChartType("donut")} className="btn btn-primary">Donut Chart</button>
+        <button onClick={() => setChartType("donut")} className="btn btn-secondary">Donut Chart</button>
         </div>
-        <Chart options={chartOptions} series={chartOptions.series} type={chartType} height={350} />
         <div className="row">
-        {connectionLessServiceList.map((data) => renderService(data))}
+            <div className="col-md-6">
+                {chartType === "bar" ? (
+                    <Chart
+                    options={BarData.options}
+                    series={BarData.series}
+                    type="bar"
+                    width="500"
+                    />
+                ) : (
+                    <Chart
+                    options={donutData.options}
+                    series={donutData.series}
+                    type="donut"
+                    width="500"
+                    />
+                )}
+            </div>
+            <div className="col-md-6">
+                {connectionLessServiceList.map((data) => renderService(data))}
+            </div>
         </div>
     </>
     )}
